@@ -1,389 +1,236 @@
-CUDA Ray Tracer
+Here is your content formatted as a professional `README.md` file:
+
+---
+
+# CUDA Ray Tracer
+
 A GPU-accelerated ray tracing renderer utilizing CUDA and OpenGL for high-performance 3D rendering.
-Show Image
-Overview
-This project implements a real-time ray tracer that leverages CUDA for parallel computation of ray intersections and shading calculations. It uses OpenGL/GLFW for window management and displaying the rendered output. The renderer currently supports basic geometric primitives (spheres) with plans to expand to more complex objects.
-Features
 
-CUDA-accelerated ray tracing for rapid rendering of 3D scenes
-Real-time interactive camera controls for scene navigation
-OpenGL integration for efficient display of ray traced output
-Cross-platform compatibility using GLFW for window management
-Shader-based post-processing pipeline
+---
 
-Requirements
+## Overview
 
-NVIDIA GPU with CUDA support
-CUDA Toolkit 10.0 or newer
-OpenGL 4.3+
-GLEW
-GLFW3
-GLM
+This project implements a real-time ray tracer that leverages **CUDA** for parallel computation of ray intersections and shading. **OpenGL** and **GLFW** are used for window management and rendering display. It currently supports basic geometric primitives (spheres), with plans for more complex geometry.
 
-Implementation Details
-Architecture Overview
-The ray tracer is built on a hybrid CPU/GPU architecture:
+---
 
-Host (CPU) Side:
+## Features
 
-Window and context management using GLFW/OpenGL
-User input processing for camera control
-Scene management and organization
-Communication with GPU via CUDA API
+* CUDA-accelerated ray tracing for fast 3D rendering
+* Real-time interactive camera controls
+* OpenGL integration for efficient image display
+* Cross-platform windowing with GLFW
+* Shader-based post-processing pipeline
 
+---
 
-Device (GPU) Side:
+## Requirements
 
-Ray generation based on camera parameters
-Parallel ray intersection tests
-Shading calculations
-Frame buffer population
+* NVIDIA GPU with CUDA support
+* CUDA Toolkit 10.0 or newer
+* OpenGL 4.3+
+* [GLEW](http://glew.sourceforge.net/)
+* [GLFW3](https://www.glfw.org/)
+* [GLM](https://github.com/g-truc/glm)
 
+---
 
+## Architecture Overview
 
-Building the Project
-On Windows with Visual Studio
+### CPU (Host)
 
-Ensure you have CUDA Toolkit and a compatible Visual Studio version installed
-Open the solution file in Visual Studio
-Configure the CUDA and external library paths in project properties
-Build the solution
+* GLFW/OpenGL for window & context management
+* Camera input and scene control
+* Scene setup and data transmission to GPU
 
-On Linux
-bashmkdir build && cd build
+### GPU (Device)
+
+* Ray generation from camera
+* Parallel ray-object intersection tests
+* Shading calculations
+* Frame buffer population for rendering
+
+---
+
+## Build Instructions
+
+### Windows (Visual Studio)
+
+1. Install CUDA Toolkit and compatible Visual Studio version
+2. Open the `.sln` file in Visual Studio
+3. Configure CUDA and library paths in project settings
+4. Build the solution
+
+### Linux
+
+```bash
+mkdir build && cd build
 cmake ..
 make
-Usage
-Controls
+```
 
-W/A/S/D - Move camera forward/left/backward/right
-Mouse - Look around
-Esc - Exit application
+---
 
-Implementation Details
-Rendering Pipeline
+## Usage
 
-Ray Generation:
+### Controls
 
-The camera system generates primary rays based on the view frustum
-Each ray corresponds to a pixel in the output image
-Ray direction is calculated using a perspective projection matrix derived from the camera's position, orientation, and field of view
+* `W/A/S/D` - Move camera
+* `Mouse` - Look around
+* `Esc` - Exit
 
+---
 
-Parallel Ray Processing:
+## Rendering Pipeline
 
-CUDA kernel launches with a thread for each pixel/ray
-Threads are organized in a 2D grid matching the output resolution
-Each thread processes its corresponding ray independently
+### Ray Generation
 
+* Camera generates primary rays per pixel
+* Rays calculated using perspective projection
 
-Intersection Testing:
+### Parallel Ray Processing
 
-Each ray is tested against all objects in the scene (currently spheres)
-Sphere intersection uses the quadratic formula to solve for ray-sphere intersections
-The closest intersection point is recorded along with normal information
+* CUDA kernel launches one thread per pixel
+* 2D thread grid matches image resolution
 
+### Intersection Testing
 
-Shading Calculation:
+* Ray-sphere intersection via quadratic formula
+* Closest hit and normal are recorded
 
-Basic Lambertian diffuse shading is applied
-Lighting direction and intensity determine surface brightness
-Potential for more complex materials and lighting models
+### Shading
 
+* Basic Lambertian diffuse shading
+* Lighting intensity based on angle of incidence
 
-Frame Buffer Update:
+### Frame Buffer Update
 
-Final colors are written to the frame buffer in parallel
-CUDA manages the memory transfer from device to host when rendering completes
+* Colors written to frame buffer in parallel
+* Memory transferred from GPU to CPU
 
+### OpenGL Display
 
-OpenGL Display:
+* Frame buffer mapped to OpenGL texture
+* Displayed on screen-aligned quad via GLFW
 
-The frame buffer is mapped to an OpenGL texture
-A simple quad is rendered with this texture
-GLFW handles window refresh and vsync
+---
 
+## Technical Implementation
 
+### Vector Math
 
-Technical Implementation
-Vector Math
-The ray tracer includes two parallel vector math implementations:
+#### CUDA Vector3
 
-CUDA Vector Math (cuda::Vector3):
+* Optimized for GPU with `__host__` / `__device__` qualifiers
+* Supports standard vector operations
+* Used in device-side math calculations
 
-Optimized for GPU execution with __device__ and __host__ attributes
-Includes basic vector operations (+, -, *, /) and utilities
-Used on the GPU side for intersection calculations
-Conditionally compiled with RT_DLL macro for shared code usage
+#### GLM Integration
 
+* Used on CPU for OpenGL and camera math
+* Compatible with OpenGL matrix pipeline
 
-GLM Integration:
+---
 
-Uses the GLM library for CPU-side vector operations
-Provides seamless integration with OpenGL's matrix system
-Used for camera transformations and view matrix calculations
+### Camera System
 
+* First-person camera with pitch/yaw rotation
+* View matrix calculated from forward/right/up vectors
+* Ray direction derived from screen-space to world-space mapping
 
+---
 
-Camera System
-The camera implementation provides an interactive first-person perspective:
+### Ray-Sphere Intersection
 
-View Matrix Calculation:
+* Uses analytical geometry to find intersection points
+* Handles rays inside objects
+* Early exits and minimal sqrt usage for performance
 
-Forward, right, and up vectors form the camera's local coordinate frame
-Look-at matrix provides the world-to-view transformation
-Support for pitch and yaw rotation with sensible constraints
+---
 
+## CUDA Integration
 
-Ray Direction Calculation:
+* Each kernel thread maps to one screen pixel
+* Memory coalescing and pinned memory for efficiency
+* Scene data in constant memory
+* Minimal host-device transfers per frame
 
-Maps screen coordinates to NDC (Normalized Device Coordinates)
-Applies inverse projection to generate ray directions
-Accounts for field of view and aspect ratio
+---
 
+## OpenGL Display
 
-Movement System:
+* Frame buffer texture updated each frame
+* Quad rendered with basic shaders
+* VSync handled via GLFW
 
-WASD keys provide forward/backward/strafe movement
-Mouse input controls camera orientation
-Smooth movement with delta time scaling
+---
 
+## Performance Considerations
 
+* Full GPU parallelization (1 thread per ray)
+* Memory coalescing and fast math used
+* Shared memory & constant memory where applicable
+* CUDA stream used for overlapping rendering/display/input
+* Profiling available via CUDA events
 
-Intersection Testing
-Ray-sphere intersection is implemented using the analytical solution:
+---
 
-Ray-Sphere Testing:
+## Current Limitations
 
-Calculates closest point between ray and sphere center
-Compares distance to sphere radius
-Solves for intersection points using Pythagorean theorem
-Accounts for rays originating inside objects
+* Only supports spheres
+* No shadows, reflections, or global illumination
+* Vector math bugs (e.g., incorrect `-=` operator)
+* Camera model lacks depth of field or motion blur
+* Fixed frame buffer size
+* No denoising or advanced materials
 
+---
 
-Performance Optimizations:
+## Future Enhancements
 
-Early rejection of rays that can't possibly hit the sphere
-Minimal square root operations to improve performance
-Parallel execution across all pixels
+### Geometry
 
+* Ray-triangle intersection
+* OBJ/FBX model support
+* Scene graph with transformations
 
+### Acceleration Structures
 
-CUDA Integration
-The ray tracer uses CUDA for parallel rendering:
+* BVH, kd-tree, or octree
+* GPU-optimized traversal algorithms
 
-Kernel Design:
+### Advanced Rendering
 
-The main rendering kernel maps one thread to one pixel
-Thread blocks are organized into a 2D grid matching the output resolution
-Memory coalescing techniques to maximize memory bandwidth
+* Path tracing & photon mapping
+* PBR material system (BSDF)
+* Textures: UV, normal, environment mapping
 
+### Performance
 
-Memory Management:
+* AI-based denoising
+* Multi-GPU rendering
+* RTX and DXR support
 
-The frame buffer is allocated as pinned memory for efficient transfers
-Scene data is kept in constant memory for fast access
-Thread-local registers store interim calculation results
+### User Experience
 
+* GUI-based scene editor
+* Post-processing (bloom, DOF, tonemapping)
+* Export high-res images and video
 
-CPU-GPU Communication:
+---
 
-Minimal data transfers between renders to maximize performance
-Camera and object parameters are updated on the GPU as needed
-Frame buffer is transferred once per frame
+## License
 
+This project is licensed under the Apache 2.0 License – see the [LICENSE](LICENSE) file for details.
 
+---
 
-OpenGL Display
-The rendered image is displayed using OpenGL:
+## Acknowledgments
 
-Texture Mapping:
+* [GLFW](https://www.glfw.org/) – Windowing and input
+* [GLM](https://github.com/g-truc/glm) – Vector/matrix math
+* [GLEW](http://glew.sourceforge.net/) – OpenGL extensions
 
-The frame buffer is mapped to a 2D texture
-A screen-aligned quad displays the texture
-Texture updates happen each frame with the new render
+---
 
-
-Shader Pipeline:
-
-Simple vertex and fragment shaders display the texture
-Potential for post-processing effects in the fragment shader
-Custom shader manager handles shader loading and compilation
-
-
-
-Performance Considerations
-The ray tracer prioritizes performance through several optimizations:
-
-Parallel Execution:
-
-CUDA kernels exploit massive GPU parallelism
-Each pixel is processed independently for perfect parallelization
-Thread blocks are sized to maximize SM utilization on NVIDIA GPUs
-
-
-Memory Access Patterns:
-
-Coalesced memory access for frame buffer operations
-Constant memory for scene data and camera parameters
-Shared memory for object data when processing multiple objects
-
-
-Computation Optimizations:
-
-Fast math instructions for non-critical calculations
-Early ray termination for rays that miss all objects
-Minimal branches to avoid thread divergence
-Vector operations optimized for GPU execution
-
-
-Asynchronous Processing:
-
-Frame rendering and display operate asynchronously
-CUDA stream management for overlapping computation and data transfer
-Input processing happens concurrently with rendering
-
-
-Profiling and Bottleneck Identification:
-
-Performance monitoring using CUDA events
-Frame timing is tracked to identify performance bottlenecks
-Commented-out timing code ready for detailed profiling
-
-
-
-Current Limitations and Challenges
-
-Geometric Primitives:
-
-Currently limited to sphere primitives
-Adding triangles would allow for arbitrary mesh rendering
-Acceleration structures needed for complex scenes
-
-
-Lighting Model:
-
-Simple diffuse shading currently implemented
-No shadows, reflections, or global illumination effects
-Limited material properties
-
-
-Vector Math Bugs:
-
-The -= operator in the Vector3 class incorrectly uses addition
-Sphere intersection algorithm has uninitialized variable issues
-Double-checking needed for numerical stability in edge cases
-
-
-Camera Model:
-
-Current pinhole camera model is simple but limited
-No depth of field or motion blur effects
-Camera matrix calculation could be further optimized
-
-
-Memory Management:
-
-More sophisticated memory allocation needed for dynamic scenes
-Current fixed-size frame buffer limits flexibility
-No denoising or temporal accumulation for image quality
-
-
-
-Future Enhancements
-Geometry and Scene Expansion
-
-Triangle Mesh Support:
-
-Implement efficient ray-triangle intersection
-Add support for OBJ/FBX model loading
-Create a scene graph for object hierarchies
-
-
-Acceleration Structures:
-
-Implement Bounding Volume Hierarchies (BVH)
-Add spatial partitioning via kd-trees or octrees
-Optimize traversal algorithms for GPU execution
-
-
-
-Advanced Rendering Features
-
-Global Illumination:
-
-Path tracing with Monte Carlo integration
-Photon mapping for caustics and indirect lighting
-Progressive rendering for convergence over time
-
-
-Material System:
-
-Physically Based Rendering (PBR) materials
-BSDF framework for realistic surface interactions
-Support for transparency, refraction and subsurface scattering
-
-
-Texture Support:
-
-UV mapping for surface textures
-Normal mapping for surface detail
-Environment mapping for reflections
-
-
-
-Performance and Quality Improvements
-
-Denoising:
-
-AI-based denoising for faster convergence
-Temporal accumulation to reduce noise
-Edge-aware filtering for sharp feature preservation
-
-
-Multi-GPU Support:
-
-Distribute rendering work across multiple GPUs
-Dynamic load balancing for heterogeneous systems
-Cluster rendering for extremely large scenes
-
-
-Real-time Ray Tracing Extensions:
-
-DirectX Ray Tracing (DXR) integration
-RTX acceleration on NVIDIA hardware
-Hybrid rasterization/ray tracing pipeline
-
-
-
-User Experience Enhancements
-
-Interactive Scene Editor:
-
-GUI for object placement and editing
-Material editor with real-time preview
-Camera path animation system
-
-
-Post-processing Pipeline:
-
-Tone mapping for HDR rendering
-Bloom, depth of field, and motion blur effects
-Color grading and LUT support
-
-
-Export Capabilities:
-
-High-resolution image output
-Animation rendering to video formats
-Frame sequences for external compositing
-
-
-
-License
-This project is licensed under the Apache 2.0 License - see the LICENSE file for details.
-Acknowledgments
-
-GLFW for window management
-GLM for mathematics operations
-GLEW for OpenGL extension handling
+Let me know if you want a downloadable `.md` version or a GitHub-compatible badge/header structure added.
