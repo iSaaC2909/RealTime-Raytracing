@@ -1,7 +1,3 @@
-Here is your content formatted as a professional `README.md` file:
-
----
-
 # CUDA Ray Tracer
 
 A GPU-accelerated ray tracing renderer utilizing CUDA and OpenGL for high-performance 3D rendering.
@@ -230,7 +226,3 @@ This project is licensed under the Apache 2.0 License – see the [LICENSE](LICE
 * [GLFW](https://www.glfw.org/) – Windowing and input
 * [GLM](https://github.com/g-truc/glm) – Vector/matrix math
 * [GLEW](http://glew.sourceforge.net/) – OpenGL extensions
-
----
-
-Let me know if you want a downloadable `.md` version or a GitHub-compatible badge/header structure added.
